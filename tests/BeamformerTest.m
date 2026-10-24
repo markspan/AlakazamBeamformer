@@ -128,6 +128,20 @@ classdef BeamformerTest < matlab.unittest.TestCase
             testCase.verifyEqual(result.beamformer.nTrials, 59);
         end
 
+        function theDefaultBinsLeaveCombinationsOut(testCase)
+        %THEDEFAULTBINSLEAVECOMBINATIONSOUT  A combination bin has no trials
+        %   of its own to beamform: with no bins chosen, every ordinary bin
+        %   is used and the combination is not (TransTools.IsComboBin).
+            epochs = testCase.Epochs;
+            epochs.bindesc(2) = struct('index', 2, 'label', 'Twice A', 'trials', [], ...
+                'combo', struct('bin', 1, 'coeff', 2));
+            o = rmfield(testCase.opts('LCMV (time domain)', 'Cortical sheet'), 'Bins');
+
+            result = FieldTripFixtures.quietly(@() Beamformer(epochs, o));
+
+            testCase.verifyEqual(result.beamformer.bins, {'A'});
+        end
+
         function windowsOfDifferentLengthsAreRefused(testCase)
             o = testCase.opts('LCMV (time domain)', 'Cortical sheet');
             o.BaselineStart = -250;
